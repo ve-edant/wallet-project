@@ -17,7 +17,7 @@ export function WalletHeader() {
   };
 
   return (
-    <header className="flex items-center justify-between w-full bg-white p-4 shadow-sm rounded-lg">
+    <header className="flex items-center justify-between w-full bg-[#111] text-white p-4 shadow-sm rounded-lg">
       {/* Left side */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold">
