@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ChainType {
+  BITCOIN
+  ETHEREUM
+  POLYGON
+  SOLANA
+  OTHER
+}
+
+model User {
+  id              String           @id @default(cuid())
+  name            String?
+  email           String?          @unique
+  emailVerified   DateTime?
+  image           String?
+
+  accounts        Account[]
+  sessions        Session[]
+  wallets         Wallet[]         // All wallets the user owns
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Wallet {
+  id            String           @id @default(cuid())
+  userId        String
+  user          User             @relation(fields: [userId], references: [id])
+
+  label         String?          // e.g., "My Main Wallet"
+  chain         ChainType
+  address       String           @unique
+  keystoreJson  String?          // optional encrypted keystore for non-custodial storage
+  isExternal    Boolean          @default(true) // true if connected via MetaMask/WalletConnect
+
+  transactions  Transaction[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([chain, address])
+}
+
+model Transaction {
+  id           String   @id @default(cuid())
+  walletId     String
+  wallet       Wallet   @relation(fields: [walletId], references: [id])
+
+  txHash       String   @unique
+  from         String
+  to           String
+  value        String   // stored in smallest unit (wei, satoshi)
+  token        String?  // ERC-20 token contract or null for native transfers
+  status       String   // pending / confirmed / failed
+  blockNumber  Int?
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
