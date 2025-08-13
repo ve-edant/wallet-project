@@ -1,3 +1,4 @@
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 interface Coin {
@@ -11,6 +12,7 @@ interface Coin {
 const CoinsContent: React.FC = () => {
   const [coins, setCoins] = useState<Coin[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchCoins() {
@@ -37,7 +39,7 @@ const CoinsContent: React.FC = () => {
       {coins.map((coin) => {
         const isPositive = coin.price_change_percentage_24h >= 0;
         return (
-          <div key={coin.id} className="flex items-center space-x-4">
+          <div onClick={() => router.push(`/dashboard/coin/${coin.id}`)} key={coin.id} className="flex items-center space-x-4">
             <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center">
               <img
                 src={coin.image}
